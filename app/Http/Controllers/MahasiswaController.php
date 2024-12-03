@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
+use App\Exports\MahasiswaExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MahasiswaController extends Controller
 {
@@ -37,5 +40,18 @@ class MahasiswaController extends Controller
         $mahasiswa->delete();
 
         return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil dihapus.');
+    }
+
+    public function export()
+    {
+        return Excel::download(new MahasiswaExport, 'mahasiswa.xlsx');
+    }
+
+    public function exportPDF()
+    {
+        $mahasiswas = Mahasiswa::all();
+        $date = now()->format('Y-m-d');
+        $pdf = PDF::loadView('mahasiswa_pdf', compact('mahasiswas', 'date'));
+        return $pdf->download("mahasiswa_{$date}.pdf");
     }
 }

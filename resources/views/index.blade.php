@@ -5,19 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Mahasiswa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f3f4f6;
+            font-family: 'Merriweather', serif;
+            background-color: #f9f9f9;
             color: #333;
             margin: 0;
             padding: 0;
         }
 
         .container {
-            max-width: 900px;
-            margin: 50px auto;
-            background: #fff;
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -25,43 +27,38 @@
 
         h1 {
             text-align: center;
-            color: #007bff;
-            margin-bottom: 20px;
+            color: #2C3E50;
         }
 
         .btn-container {
-            text-align: center;
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
             margin-bottom: 20px;
         }
 
-        .btn-add {
-            display: inline-block;
-            background-color: #28a745;
+        .btn-add,
+        .btn-export,
+        .btn-back {
+            background-color: #3498db;
             color: white;
-            padding: 10px 15px;
+            padding: 10px 20px;
             text-decoration: none;
+            font-weight: bold;
             border-radius: 5px;
-            font-size: 16px;
-            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
         }
 
-        .btn-add:hover {
-            background-color: #218838;
-        }
-
-        .alert {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 10px;
-            border: 1px solid #c3e6cb;
-            border-radius: 5px;
-            margin-bottom: 20px;
+        .btn-add:hover,
+        .btn-export:hover,
+        .btn-back:hover {
+            background-color: #2980b9;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
 
         th,
@@ -72,71 +69,76 @@
         }
 
         th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
+            background-color: #f2f2f2;
+            font-weight: bold;
         }
 
         .btn-delete {
-            background-color: #dc3545;
-            color: white;
-            padding: 5px 10px;
+            color: #e74c3c;
             text-decoration: none;
-            border-radius: 5px;
-            font-size: 14px;
+            font-weight: bold;
         }
 
         .btn-delete:hover {
-            background-color: #c82333;
+            color: #c0392b;
         }
 
-        /* Blur effect for confirmation dialog */
-        .overlay {
-            display: none;
+        /* Modal (Delete Confirmation) */
+        #overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 9999;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
             justify-content: center;
             align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease;
         }
 
-        .overlay.active {
+        #overlay.active {
             display: flex;
+            opacity: 1;
         }
 
-        .overlay .modal {
+        .modal {
             background: #fff;
             padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            width: 400px;
             text-align: center;
-            max-width: 400px;
-            width: 100%;
         }
 
-        .overlay .modal button {
-            background-color: #dc3545;
+        .modal h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .modal .btn {
+            background-color: #e74c3c;
             color: white;
             padding: 10px 20px;
+            border: none;
             border-radius: 5px;
-            font-size: 16px;
             cursor: pointer;
-            margin: 10px;
+            transition: background-color 0.3s ease;
         }
 
-        .overlay .modal button:hover {
-            background-color: #c82333;
+        .modal .btn:hover {
+            background-color: #c0392b;
+        }
+
+        .modal .btn-cancel {
+            background-color: #bdc3c7;
+            margin-left: 10px;
+        }
+
+        .modal .btn-cancel:hover {
+            background-color: #95a5a6;
         }
     </style>
 </head>
@@ -147,6 +149,10 @@
 
         <div class="btn-container">
             <a href="{{ route('mahasiswa.create') }}" class="btn-add">Tambah Mahasiswa Baru</a>
+            <a href="{{ route('mahasiswa.export') }}" class="btn-export">Download Excel</a>
+            <a href="{{ route('mahasiswa.exportPDF') }}" class="btn-export">Download PDF</a>
+            <!-- New Back Button -->
+            <a href="{{ route('dashboard') }}" class="btn-back">Kembali</a>
         </div>
 
         @if (session('success'))
@@ -179,13 +185,11 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div class="overlay" id="overlay">
+    <div id="overlay">
         <div class="modal">
-            <h3>Anda yakin ingin menghapus?</h3>
-            <div>
-                <button onclick="deleteRecord()">Ya, Hapus</button>
-                <button onclick="closeModal()">Batal</button>
-            </div>
+            <h3>Anda yakin ingin menghapus data ini?</h3>
+            <button class="btn" onclick="deleteRecord()">Hapus</button>
+            <button class="btn btn-cancel" onclick="closeModal()">Batal</button>
         </div>
     </div>
 

@@ -23,6 +23,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/mahasiswa/create', [MahasiswaController::class, 'create'])->name('mahasiswa.create');
     Route::post('/mahasiswa/store', [MahasiswaController::class, 'store'])->name('mahasiswa.store');
     Route::get('/mahasiswa/delete/{id}', [MahasiswaController::class, 'destroy'])->name('mahasiswa.delete');
+    Route::get('/mahasiswa/export-pdf', [MahasiswaController::class, 'exportPDF'])->name('mahasiswa.exportPDF');
+    Route::get('/mahasiswa/export', [MahasiswaController::class, 'export'])->name('mahasiswa.export');
+
+
+
 });
 
 require __DIR__.'/auth.php';

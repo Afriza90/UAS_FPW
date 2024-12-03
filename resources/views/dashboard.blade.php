@@ -11,6 +11,13 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     {{ __("You're logged in!") }}
                 </div>
+                <!-- Button to navigate to Daftar Mahasiswa page -->
+                <div class="p-6">
+                    <a href="{{ route('mahasiswa.index') }}"
+                        class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">
+                        Lihat Daftar Mahasiswa
+                    </a>
+                </div>
             </div>
         </div>
     </div>
